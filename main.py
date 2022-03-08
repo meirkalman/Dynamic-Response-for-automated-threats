@@ -4,7 +4,7 @@ app = Flask(__name__)
 
 @app.route("/")
 def test():
-    return redirect('127.0.0.1:3000', code=301)
+    return redirect('127.0.0.1:3001', code=301)
 
 
 if __name__ == '__main__':
