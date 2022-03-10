@@ -25,7 +25,6 @@ def proxy(path):
         # option 3:
         # sleep_abort()
         # option 4:
-        index = "OWASP_Juice_Shop.html"
         return fake_response()
 
     return get(f'{SITE_NAME}{path}').content
