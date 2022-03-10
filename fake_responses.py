@@ -16,5 +16,5 @@ def empty_response():
 
 
 def fake_response():
-    index = "OWASP_Juice_Shop.html"
+    index = "FAKE_Juice_Shop.html"
     return render_template(index)
