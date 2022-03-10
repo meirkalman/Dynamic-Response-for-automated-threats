@@ -18,3 +18,8 @@ def empty_response():
 def fake_response():
     index = "FAKE_Juice_Shop.html"
     return render_template(index)
+
+def hold_session(s):
+    s.keep_alive = True
+    s.status_code = 200
+    return "", s.status_code

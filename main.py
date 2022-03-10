@@ -7,7 +7,7 @@ from requests import *
 
 
 app = Flask('__main__')
-SITE_NAME = 'https://www.ynet.co.il/home/0,7340,L-8,00.html'
+SITE_NAME = 'http://localhost:3000/'
 
 
 def detect_attack():
@@ -17,7 +17,8 @@ def detect_attack():
 @app.route('/', defaults={'path': ''})
 @app.route('/<path:path>')
 def proxy(path):
-    if detect_attack():
+    s = requests.session()
+    #if detect_attack():
         # option 1:
         # abort_503()
         # option 2
@@ -25,7 +26,9 @@ def proxy(path):
         # option 3:
         # sleep_abort()
         # option 4:
-        return fake_response()
+        # return fake_response()
+        # option 5:
+        #return hold_session(s)
 
     return get(f'{SITE_NAME}{path}').content
 
