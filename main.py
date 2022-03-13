@@ -2,12 +2,10 @@ import simplejson
 import time
 from fake_responses import *
 import requests
-from flask import *
-from requests import *
-
+from flask import Flask, request, Response
 
 app = Flask('__main__')
-SITE_NAME = 'https://hack-yourself-first.com/'
+SITE_NAME = 'http://localhost:3000/'
 
 
 def detect_attack():
@@ -30,26 +28,30 @@ def proxy(path):
     # option 5:
     # return hold_session(s)
 
-    return get(f'{SITE_NAME}{path}').content
+    resp = requests.request(
+        method=request.method,
+        url=SITE_NAME + path)
+
+    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+    headers = [(name, value) for (name, value) in resp.raw.headers.items()
+               if name.lower() not in excluded_headers]
+
+    response = Response(resp.content, resp.status_code, headers)
+
+    return response
 
 
-app.run( debug=True)
+app.run(debug=True)
 
 
 """
-
 @app.route('/Account/Login',methods = ['POST','GET'])
 def login():
     payload = {'Email': 'dsfs@gmail.com', 'Password': '12345678'}
     return post(f'{SITE_NAME}/Account/Login',data=payload).content
 
-
-
-
-    
  # if request.method == 'POST':
     password =request.POST.get('Password','')
-
     email = request.POST.get('Email','')
     payload = {'Email': email, 'Password': password}
 """
