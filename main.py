@@ -1,7 +1,7 @@
-import simplejson
 import time
 from requests import post
 
+from detector import detect_brute_force_password
 from fake_responses import *
 import requests
 from flask import Flask, request, Response
@@ -15,7 +15,7 @@ def detect_attack():
 
 
 @app.route('/', defaults={'path': ''})
-#@app.route('/<path:path>')
+# @app.route('/<path:path>')
 def proxy(path):
     # s = requests.session()
     # if detect_attack():
@@ -42,31 +42,19 @@ def proxy(path):
     return response
 
 
-
-@app.route('/Account/Login',methods = ['POST','GET'])
+@app.route('/Account/Login',methods=['POST', 'GET'])
 def login():
-    payload = request.get_data(as_text=True)
-    print(payload)
-    pay2 = payload.split("&")
-    email = (pay2[0].split("="))[1].replace("%40","@")
-    print(email)
-    pass1 = (pay2[1].split("="))[1]
-    print(pass1)
-    payload = {'Email': email, 'Password': pass1}
+    raw_data = request.get_data(as_text=True)
+    payload_array = raw_data.split("&")
+    email = (payload_array[0].split("="))[1].replace("%40","@")
+    password = (payload_array[1].split("="))[1]
+    # input validation
+    if (payload_array[0].split("="))[0] != "Email" or (payload_array[1].split("="))[0] != "Password":
+        return 'Invalid Parameters in Your Json'
+    if detect_brute_force_password(email, password):    # extract ip
+        return abort_503()
+    payload = {'Email': email, 'Password': password}
     return post(f'{SITE_NAME}/Account/Login',data=payload).content
 
 
 app.run(debug=True)
-
-
-"""
-@app.route('/Account/Login',methods = ['POST','GET'])
-def login():
-    payload = {'Email': 'dsfs@gmail.com', 'Password': '12345678'}
-    return post(f'{SITE_NAME}/Account/Login',data=payload).content
-
- # if request.method == 'POST':
-    password =request.POST.get('Password','')
-    email = request.POST.get('Email','')
-    payload = {'Email': email, 'Password': password}
-"""
