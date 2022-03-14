@@ -1,5 +1,5 @@
 import time
-from requests import post
+from requests import post, get
 
 from detector import detect_brute_force_password
 from fake_responses import *
@@ -30,16 +30,9 @@ def proxy(path):
     # option 5:
     # return hold_session(s)
 
-    resp = requests.request(
-        method=request.method,
-        url=SITE_NAME + path)
+    return get(f'{SITE_NAME}{path}').content
 
-    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = [(name, value) for (name, value) in resp.raw.headers.items()
-               if name.lower() not in excluded_headers]
-    response = Response(resp.content, resp.status_code, headers)
 
-    return response
 
 
 @app.route('/Account/Login',methods=['POST', 'GET'])
@@ -51,7 +44,8 @@ def login():
     # input validation
     if (payload_array[0].split("="))[0] != "Email" or (payload_array[1].split("="))[0] != "Password":
         return 'Invalid Parameters in Your Json'
-    if detect_brute_force_password(email, password):    # extract ip
+
+    if detect_brute_force_password(email, password):    # extract ip and time
         return abort_503()
     payload = {'Email': email, 'Password': password}
     return post(f'{SITE_NAME}/Account/Login',data=payload).content
