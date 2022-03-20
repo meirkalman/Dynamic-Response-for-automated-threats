@@ -33,10 +33,9 @@ def proxy(path):
     return get(f'{SITE_NAME}{path}').content
 
 
-
-
 @app.route('/Account/Login',methods=['POST', 'GET'])
 def login():
+    sender_ip = request.remote_addr
     raw_data = request.get_data(as_text=True)
     payload_array = raw_data.split("&")
     email = (payload_array[0].split("="))[1].replace("%40","@")
@@ -45,7 +44,7 @@ def login():
     if (payload_array[0].split("="))[0] != "Email" or (payload_array[1].split("="))[0] != "Password":
         return 'Invalid Parameters in Your Json'
 
-    if detect_brute_force_password(email, password):    # extract ip and time
+    if detect_brute_force_password(email, password, sender_ip):    # extract ip and time
         return abort_503()
     payload = {'Email': email, 'Password': password}
     return post(f'{SITE_NAME}/Account/Login',data=payload).content
