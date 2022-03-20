@@ -15,7 +15,7 @@ def detect_attack():
 
 
 @app.route('/', defaults={'path': ''})
-#  @app.route('/<path:path>')
+# @app.route('/<path:path>')
 def proxy(path):
     # s = requests.session()
     # if detect_attack():
@@ -29,18 +29,8 @@ def proxy(path):
     # return fake_response()
     # option 5:
     # return hold_session(s)
-    resp = requests.request(
-        method=request.method,
-        url=SITE_NAME + path,
-        data=request.get_data(),
-        cookies=request.cookies,
-        allow_redirects=False)
 
-    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = [(name, value) for (name, value) in resp.raw.headers.items()
-               if name.lower() not in excluded_headers]
-
-    response = Response(resp.content, resp.status_code, headers)
+    return get(f'{SITE_NAME}{path}').content
 
 
     return response
@@ -83,6 +73,7 @@ def login():
 #post data for hack-yourself-first.com
 @app.route('/Account/Login',methods=['POST', 'GET'])
 def login():
+    sender_ip = request.remote_addr
     raw_data = request.get_data(as_text=True)
     payload_array = raw_data.split("&")
     email = (payload_array[0].split("="))[1].replace("%40","@")
@@ -91,7 +82,7 @@ def login():
     if (payload_array[0].split("="))[0] != "Email" or (payload_array[1].split("="))[0] != "Password":
         return 'Invalid Parameters in Your Json'
 
-    if detect_brute_force_password(email, password):    # extract ip and time
+    if detect_brute_force_password(email, password, sender_ip):    # extract ip and time
         return abort_503()
     payload = {'Email': email, 'Password': password}
     return post(f'{SITE_NAME}/Account/Login',data=payload).content
