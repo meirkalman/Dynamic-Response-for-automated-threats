@@ -15,7 +15,7 @@ def detect_attack():
 
 
 @app.route('/', defaults={'path': ''})
-# @app.route('/<path:path>')
+#@app.route('/<path:path>')
 def proxy(path):
     # s = requests.session()
     # if detect_attack():
@@ -33,13 +33,10 @@ def proxy(path):
     return get(f'{SITE_NAME}{path}').content
 
 
-    return response
-    #return get(f'{SITE_NAME}{path}').content
-
-
 #post data for juice shop http://localhost:5000/#/login
 @app.route('/login',methods=['POST', 'GET'])
 def login():
+    sender_ip = request.remote_addr
     print("ssssssssssssssssssssssssssssssssssssssssssssssss")
     raw_data = request.get_data(as_text=True)
     print(raw_data)
@@ -48,23 +45,10 @@ def login():
     extract_password = (payload_array[1].split("="))[1]
     print(extract_email + "  ::  " + extract_password)
     payload = {'email': extract_email, 'password': extract_password}
+   # if detect_brute_force_password(extract_email, extract_password, sender_ip):  # extract ip and time
+       # return sleep_abort()
 
-    resp = requests.request(
-        method='POST',
-        url=SITE_NAME + '/#/login',
-        data=payload,
-        cookies=request.cookies,
-        allow_redirects=False)
-
-    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = [(name, value) for (name, value) in resp.raw.headers.items()
-               if name.lower() not in excluded_headers]
-
-    response = Response(resp.content, resp.status_code, headers)
-    print(response)
-    return response
-
-    #return post(f'{SITE_NAME}/#/login',data=payload).content
+    return post(f'{SITE_NAME}/#/login',data=payload).content
 
 
 
