@@ -1,13 +1,13 @@
 import time
 from requests import post, get
 
-from detector import detect_brute_force_password
+from detector import detect_brute_force_password, detect_dos_attack
 from fake_responses import *
 import requests
 from flask import Flask, request, Response
 
 app = Flask('__main__')
-SITE_NAME = "http://localhost:3000/"
+SITE_NAME = "http://127.0.0.1:3000/"
 
 
 def detect_attack():
@@ -30,29 +30,15 @@ def proxy(path):
     # option 5:
     # return hold_session(s)
 
-    return get(f'{SITE_NAME}{path}').content
+    sender_ip = request.remote_addr
+    if detect_dos_attack(sender_ip):
+        return abort_503()
 
-
-    return response
-    #return get(f'{SITE_NAME}{path}').content
-
-
-#post data for juice shop http://localhost:5000/#/login
-@app.route('/login',methods=['POST', 'GET'])
-def login():
-    print("ssssssssssssssssssssssssssssssssssssssssssssssss")
-    raw_data = request.get_data(as_text=True)
-    print(raw_data)
-    payload_array = raw_data.split("&")
-    extract_email = (payload_array[0].split("="))[1].replace("%40","@")
-    extract_password = (payload_array[1].split("="))[1]
-    print(extract_email + "  ::  " + extract_password)
-    payload = {'email': extract_email, 'password': extract_password}
-
+    # return get(f'{SITE_NAME}{path}').content
     resp = requests.request(
-        method='POST',
-        url=SITE_NAME + '/#/login',
-        data=payload,
+        method=request.method,
+        url=SITE_NAME + path,
+        data=request.get_data(),
         cookies=request.cookies,
         allow_redirects=False)
 
@@ -61,10 +47,35 @@ def login():
                if name.lower() not in excluded_headers]
 
     response = Response(resp.content, resp.status_code, headers)
-    print(response)
     return response
 
-    #return post(f'{SITE_NAME}/#/login',data=payload).content
+
+# post data for juice shop http://localhost:5000/#/login
+@app.route('/login',methods=['POST', 'GET'])
+def login():
+    raw_data = request.get_data(as_text=True)
+    print(raw_data)
+    payload_array = raw_data.split("&")
+    extract_email = (payload_array[0].split("="))[1].replace("%40","@")
+    extract_password = (payload_array[1].split("="))[1]
+    payload = {'email': extract_email, 'password': extract_password}
+
+    resp = requests.request(
+        method='POST',
+        url=SITE_NAME + '/#/login',
+        data=payload,
+        cookies=request.cookies,
+        allow_redirects=False)
+    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+    headers = [(name, value) for (name, value) in resp.headers.items()
+               if name.lower() not in excluded_headers]
+    """
+    response = Response(resp.content, resp.status_code, headers)
+    print(response)
+    return response
+    """
+
+    return requests.post(f'{SITE_NAME}/#/login',data=payload, json=headers).content
 
 
 
