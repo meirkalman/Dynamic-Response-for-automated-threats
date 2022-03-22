@@ -59,23 +59,10 @@ def login():
     extract_email = (payload_array[0].split("="))[1].replace("%40","@")
     extract_password = (payload_array[1].split("="))[1]
     payload = {'email': extract_email, 'password': extract_password}
+   # if detect_brute_force_password(extract_email, extract_password, sender_ip):  # extract ip and time
+       # return sleep_abort()
 
-    resp = requests.request(
-        method='POST',
-        url=SITE_NAME + '/#/login',
-        data=payload,
-        cookies=request.cookies,
-        allow_redirects=False)
-    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
-    headers = [(name, value) for (name, value) in resp.headers.items()
-               if name.lower() not in excluded_headers]
-    """
-    response = Response(resp.content, resp.status_code, headers)
-    print(response)
-    return response
-    """
-
-    return requests.post(f'{SITE_NAME}/#/login',data=payload, json=headers).content
+    return post(f'{SITE_NAME}/#/login',data=payload).content
 
 
 
