@@ -38,3 +38,7 @@ def detect_dos_attack(sender_ip):
 
 for x in range(10):
     detect_dos_attack("sss")
+
+
+def detect_attack():
+    return True

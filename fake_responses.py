@@ -20,7 +20,7 @@ def fake_response():
     return render_template(index)
 
 
-def hold_session(s):
+def hold_session(s):  # TO DO: need to be fixed
     s.keep_alive = True
     s.status_code = 200
     return "", s.status_code
