@@ -28,16 +28,12 @@ def detect_dos_attack(sender_ip):
         dos_attack_db[sender_ip] = [current_time]
     else:
         dos_attack_db[sender_ip].append(current_time)
-        if len(dos_attack_db[sender_ip]) >= MAX_ALLOWED_LOGIN_REQUESTS:
-            delta_of_time = dos_attack_db[sender_ip][len(dos_attack_db[sender_ip])-1] - \
-                            dos_attack_db[sender_ip][len(dos_attack_db[sender_ip])-5]
+        if len(dos_attack_db[sender_ip]) > MAX_ALLOWED_LOGIN_REQUESTS:
+            delta_of_time = dos_attack_db[sender_ip][len(dos_attack_db[sender_ip]) - 1] - \
+                            dos_attack_db[sender_ip][len(dos_attack_db[sender_ip]) - 5]
             if delta_of_time / timedelta(minutes=1) < INTERVAL_OF_TIME:
                 return True
             return False
-
-
-for x in range(10):
-    detect_dos_attack("sss")
 
 
 def detect_attack():

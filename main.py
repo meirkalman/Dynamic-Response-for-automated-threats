@@ -67,28 +67,9 @@ def login():
     print(email + "  ::  " + password)
     payload = {'email': email, 'password': password}
     if detect_brute_force_password(email, password, sender_ip):  # extract ip and time
-        return hold_session(requests.Session())
+        return abort_503()
 
     return requests.post(f'{SITE_NAME}/rest/user/login', payload).content
 
 
-"""
-#post data for hack-yourself-first.com
-@app.route('/Account/Login',methods=['POST', 'GET'])
-def login():
-    sender_ip = request.remote_addr
-    raw_data = request.get_data(as_text=True)
-    payload_array = raw_data.split("&")
-    email = (payload_array[0].split("="))[1].replace("%40","@")
-    password = (payload_array[1].split("="))[1]
-    # input validation
-    if (payload_array[0].split("="))[0] != "Email" or (payload_array[1].split("="))[0] != "Password":
-        return 'Invalid Parameters in Your Json'
-
-    if detect_brute_force_password(email, password, sender_ip):    # extract ip and time
-        return abort_503()
-    payload = {'Email': email, 'Password': password}
-    return post(f'{SITE_NAME}/Account/Login',data=payload).content
-
-"""
 app.run(debug=True)
