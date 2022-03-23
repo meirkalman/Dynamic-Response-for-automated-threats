@@ -51,7 +51,7 @@ def proxy(path):
 
 
 # post data for juice shop http://localhost:5000/#/login
-@app.route('/login',methods=['POST', 'GET'])
+@app.route('/login', methods=['POST', 'GET'])
 def login():
     raw_data = request.get_data(as_text=True)
     print(raw_data)
