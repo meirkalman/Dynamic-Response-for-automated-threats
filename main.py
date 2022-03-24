@@ -9,6 +9,7 @@ from flask import Flask, request, Response
 
 app = Flask('__main__')
 SITE_NAME = "http://127.0.0.1:3000/"
+LOGIN_PATH = 'rest/user/login'
 
 
 @app.route('/', defaults={'path': ''}, methods=['POST', 'GET', 'PUT'])
@@ -29,6 +30,9 @@ def proxy(path):
 
     sender_ip = request.remote_addr
     if detect_dos_attack(sender_ip, path):
+        return abort_503()
+
+    if path == LOGIN_PATH and login(request):
         return abort_503()
 
     resp = requests.request(
@@ -68,23 +72,17 @@ def carding():
 
     return requests.post(f'{SITE_NAME}/api/Cards/', payload).content
 
-"""
-# post data for juice shop http://localhost:5000/#/login
-@app.route('/rest/user/login', methods=['POST', 'GET'])
-def login():
-    sender_ip = request.remote_addr
-    print("route to login")
-    raw_data = request.get_data(as_text=True)
-    payload_array = raw_data.split("&")
-    email = (payload_array[0].split("="))[1].replace("%40", "@")
-    password = (payload_array[1].split("="))[1]
-    print(email + "  ::  " + password)
-    payload = {'email': email, 'password': password}
-    if detect_brute_force_password(email, password, sender_ip):  # extract ip and time
-        return abort_503()
 
-    return requests.post(f'{SITE_NAME}/rest/user/login', payload).content
-"""
+# post data for juice shop http://localhost:5000/#/login
+def login(request):
+    sender_ip = request.remote_addr
+    raw_data = request.get_json()
+    email = raw_data["email"]
+    password = raw_data["password"]
+    print(email + "  ::  " + password)
+    if detect_brute_force_password(email, password, sender_ip):  # extract ip and time
+        return True
+    return False
 
 
 app.run(debug=True)
