@@ -11,8 +11,8 @@ app = Flask('__main__')
 SITE_NAME = "http://127.0.0.1:3000/"
 
 
-@app.route('/', defaults={'path': ''})
-# @app.route('/<path:path>')
+@app.route('/', defaults={'path': ''}, methods=['POST', 'GET', 'PUT'])
+@app.route('/<path:path>', methods=['POST', 'GET', 'PUT'])
 def proxy(path):
     # s = requests.session()
     # if detect_attack():
@@ -28,10 +28,24 @@ def proxy(path):
     # return hold_session(s)
 
     sender_ip = request.remote_addr
-    if detect_dos_attack(sender_ip):
+    if detect_dos_attack(sender_ip, path):
         return abort_503()
 
-    return get(f'{SITE_NAME}{path}').content
+    resp = requests.request(
+        method=request.method,
+        headers={key: value for (key, value) in request.headers if key != 'Host'},
+        url=SITE_NAME + path,
+        data=request.get_data(),
+        cookies=request.cookies,
+        allow_redirects=False)
+
+    excluded_headers = ['content-encoding', 'content-length', 'transfer-encoding', 'connection']
+    headers = [(name, value) for (name, value) in resp.raw.headers.items()
+               if name.lower() not in excluded_headers]
+
+    response = Response(resp.content, resp.status_code, headers)
+    print(response)
+    return response
 
 
 @app.route('/api/Cards/', methods=['POST', 'GET'])
@@ -54,7 +68,7 @@ def carding():
 
     return requests.post(f'{SITE_NAME}/api/Cards/', payload).content
 
-
+"""
 # post data for juice shop http://localhost:5000/#/login
 @app.route('/rest/user/login', methods=['POST', 'GET'])
 def login():
@@ -70,6 +84,7 @@ def login():
         return abort_503()
 
     return requests.post(f'{SITE_NAME}/rest/user/login', payload).content
+"""
 
 
 app.run(debug=True)

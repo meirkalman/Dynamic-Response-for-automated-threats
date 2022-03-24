@@ -22,7 +22,9 @@ def detect_brute_force_password(email, password, sender_ip):
         return False
 
 
-def detect_dos_attack(sender_ip):
+def detect_dos_attack(sender_ip, path):
+    if path != "":
+        return False
     current_time = datetime.now()
     if sender_ip not in dos_attack_db:
         dos_attack_db[sender_ip] = [current_time]
