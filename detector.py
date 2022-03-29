@@ -3,8 +3,10 @@ from time import sleep
 
 password_brute_force_db = {}
 dos_attack_db = {}
+scraping_db = {}
 MAX_ALLOWED_PASSWORD_GUESS = 5
 MAX_ALLOWED_LOGIN_REQUESTS = 5
+MAX_ALLOWED_SCRAPING_ATTEMPTS = 2
 # amount of minutes for interval of login attempts that allowed and not detected as DOS attack
 INTERVAL_OF_TIME = 2
 
@@ -38,5 +40,17 @@ def detect_dos_attack(sender_ip, path):
             return False
 
 
-def detect_attack():
-    return True
+def detect_scraping(sender_ip, path):
+    if "api/BasketItems" not in path:
+        return False
+    current_time = datetime.now()
+    if sender_ip not in scraping_db:
+        scraping_db[sender_ip] = [current_time]
+    else:
+        scraping_db[sender_ip].append(current_time)
+        if len(scraping_db[sender_ip]) > MAX_ALLOWED_SCRAPING_ATTEMPTS:
+            delta_of_time = scraping_db[sender_ip][len(scraping_db[sender_ip]) - 1] - \
+                            scraping_db[sender_ip][len(scraping_db[sender_ip]) - 3]
+            if delta_of_time / timedelta(minutes=1) < INTERVAL_OF_TIME:
+                return True
+            return False

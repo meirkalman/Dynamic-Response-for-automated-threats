@@ -30,4 +30,9 @@ def login(request):
         return abort_503()
 
     return requests.post(f'{SITE_NAME}/rest/user/login', payload).content
+    
+    ****************************************************************
+    
+    # my_data = '{"quantity":3,"nudnik":true}'.encode()
+
 """

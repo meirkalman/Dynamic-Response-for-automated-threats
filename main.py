@@ -1,3 +1,4 @@
+import binascii
 import time
 import json
 from requests import post, get
@@ -13,7 +14,7 @@ LOGIN_PATH = 'rest/user/login'
 
 
 @app.route('/', defaults={'path': ''}, methods=['POST', 'GET', 'PUT'])
-@app.route('/<path:path>', methods=['POST', 'GET', 'PUT'])
+@app.route('/<path:path>', methods=['POST', 'GET', 'PUT', 'DELETE'])
 def proxy(path):
     # s = requests.session()
     # if detect_attack():
@@ -35,11 +36,18 @@ def proxy(path):
     if path == LOGIN_PATH and login(request):
         return abort_503()
 
+    my_data = request.get_data()
+    if (request.method == 'POST' or request.method == 'PUT') and detect_scraping(sender_ip, path):
+        my_data = request.get_json()
+        my_data["nudnik"] = True
+        json_string = json.dumps(my_data).encode()
+        my_data = json_string
+
     resp = requests.request(
         method=request.method,
         headers={key: value for (key, value) in request.headers if key != 'Host'},
         url=SITE_NAME + path,
-        data=request.get_data(),
+        data=my_data,
         cookies=request.cookies,
         allow_redirects=False)
 
@@ -48,7 +56,6 @@ def proxy(path):
                if name.lower() not in excluded_headers]
 
     response = Response(resp.content, resp.status_code, headers)
-    print(response)
     return response
 
 
@@ -67,9 +74,6 @@ def carding():
     print(card_num)
     payload = {'fullName': full_name, 'cardNum': card_num, 'expMonth': exp_month,
                'expYear': exp_year}
-    # if detect_brute_force_password(extract_email, extract_password, sender_ip):  # extract ip and time
-    #   return hold_session(requests.Session())
-
     return requests.post(f'{SITE_NAME}/api/Cards/', payload).content
 
 
