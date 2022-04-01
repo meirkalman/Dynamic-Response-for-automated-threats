@@ -5,7 +5,7 @@ password_brute_force_db = {}
 dos_attack_db = {}
 scraping_db = {}
 MAX_ALLOWED_PASSWORD_GUESS = 5
-MAX_ALLOWED_LOGIN_REQUESTS = 3
+MAX_ALLOWED_LOGIN_REQUESTS = 4
 MAX_ALLOWED_SCRAPING_ATTEMPTS = 2
 # amount of minutes for interval of login attempts that allowed and not detected as DOS attack
 INTERVAL_OF_TIME = 2

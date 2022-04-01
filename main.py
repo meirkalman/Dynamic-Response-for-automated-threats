@@ -1,4 +1,4 @@
-# for OWASP juice-shop app
+# proxy for OWASP juice-shop app
 
 import binascii
 import time
@@ -18,6 +18,7 @@ LOGIN_PATH = 'rest/user/login'
 @app.route('/', defaults={'path': ''}, methods=['POST', 'GET', 'PUT'])
 @app.route('/<path:path>', methods=['POST', 'GET', 'PUT', 'DELETE'])
 def proxy(path):
+    # bank of responses:
     # s = requests.session()
     # if detect_attack():
     # option 1:
@@ -33,13 +34,20 @@ def proxy(path):
 
     sender_ip = request.remote_addr
     if detect_dos_attack(sender_ip, path):
-        return fake_response()
+        # issue: response of fake html is not possible because client sent ajax request so
+        # it will not re-render the page... print only "[Object object]"...
+        return abort_503()
 
     if path == LOGIN_PATH and login(request):
         return abort_503()
 
     my_data = request.get_data()
     if (request.method == 'POST' or request.method == 'PUT') and detect_scraping(sender_ip, path):
+        # issue: we want to return error message but the server return valid payload
+        # solution: we changed the code in server to return our desired error message and here
+        # we send a flag to server to do it
+        # better solution (did not implemented here): hold the error message here in proxy
+        # and replace the response that we get from server accordingly (in line 68+-)
         my_data = request.get_json()
         my_data["nudnik"] = True
         json_string = json.dumps(my_data).encode()

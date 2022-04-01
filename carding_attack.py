@@ -1,6 +1,7 @@
 import requests
 
 
+# not work !!
 def carding_attack_to_juice_shop():  # get all the time good answer
 
     for i in range(5326102314421000, 5326102314421001):
